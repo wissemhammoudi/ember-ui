@@ -1,0 +1,60 @@
+<ContentPanel @title="Delivery options" @open={{true}} @wrapperClass="bordered-top">
+    <div class="space-y-3" {{did-insert this.load}}>
+        {{#if this.deliveryOptions.error}}
+            <p role="alert">{{this.deliveryOptions.error}}</p>
+            <Button @text="Try again" @onClick={{this.load}} />
+        {{/if}}
+        <fieldset class="space-y-2">
+            <legend class="font-semibold">Delivery type</legend>
+            <div class="flex flex-wrap gap-3">
+                {{#each this.deliveryOptions.catalogue.purposes as |option|}}
+                    <button type="button" class={{if (eq this.purpose option.value) "form-input border-red-500 text-red-600 px-4 py-3" "form-input px-4 py-3"}} aria-pressed={{eq this.purpose option.value}} {{on "click" (fn this.setValue "purpose" option.value)}}>{{option.label}}</button>
+                {{/each}}
+            </div>
+        </fieldset>
+        <p>Transport: sender pickup to recipient drop-off. Return: collection from the recipient back to the sender. Choose both addresses below.</p>
+        <fieldset class="space-y-2">
+            <legend class="font-semibold">Delivery service</legend>
+            <div class="flex flex-wrap gap-3">
+                {{#each this.deliveryOptions.catalogue.service_levels as |option|}}
+                    <button type="button" class={{if (eq this.serviceLevel option.value) "form-input border-red-500 text-red-600 px-4 py-3" "form-input px-4 py-3 disabled:opacity-50"}} aria-pressed={{eq this.serviceLevel option.value}} disabled={{not option.available}} {{on "click" (fn this.setValue "service_level" option.value)}}>{{option.label}}</button>
+                {{/each}}
+            </div>
+            <p>Standard: normal delivery service. Express: priority handling at a higher price, not a guaranteed delivery time. Express pricing is being configured; unavailable for new orders.</p>
+            {{#if (eq this.serviceLevel "express")}}<p role="alert">Choose Standard and request a new quote before creating an order.</p>{{/if}}
+        </fieldset>
+        <label class="flex items-start gap-2">
+            <input type="checkbox" checked={{this.openingAllowed}} {{on "change" this.setOpening}} />
+            <span>Allow the recipient to open the parcel before accepting it?</span>
+        </label>
+        <p>Visual inspection only, supervised by the driver before acceptance/payment. No product use or testing. Not allowed unless the sender selects this option.</p>
+        {{#if (eq this.purpose "return")}}
+            <p>Collect from the recipient and deliver back to the sender. Confirm the collection and destination addresses below. Do not copy cash collection from the original delivery.</p>
+            <InputGroup @name="Return reason (optional)">
+                <input type="text" value={{@meta.delivery.return_reason}} maxlength="1000" class="form-input w-full" {{on "input" this.setReason}} />
+            </InputGroup>
+        {{/if}}
+        <p class="text-sm">{{this.deliveryOptions.catalogue.notice}}</p>
+        <details>
+            <summary class="cursor-pointer font-semibold">How to package your parcel</summary>
+            <ol class="list-decimal pl-5">
+                {{#each this.deliveryOptions.catalogue.customer_instructions as |instruction|}}<li>{{instruction}}</li>{{/each}}
+            </ol>
+            {{#each this.deliveryOptions.catalogue.categories as |category|}}
+                <section class="space-y-2 py-3">
+                    <h3 class="font-semibold">{{category.label}}</h3>
+                    <p>{{category.examples}}</p>
+                    <p>Allowed outer packaging:</p>
+                    <ul class="list-disc pl-5">
+                        {{#each category.packaging_types as |packaging|}}<li>{{smart-humanize packaging}}</li>{{/each}}
+                    </ul>
+                    <p>Only the packaging options listed for this category are permitted. Plain unpadded envelopes and textile outer bags are not compliant.</p>
+                    <ol class="list-decimal pl-5">
+                        {{#each category.instructions as |instruction|}}<li>{{instruction}}</li>{{/each}}
+                    </ol>
+                    <p>{{category.warning}}</p>
+                </section>
+            {{/each}}
+        </details>
+    </div>
+</ContentPanel>

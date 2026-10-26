@@ -1,0 +1,15 @@
+<div class="space-y-2" {{did-insert this.load}}>
+    <InputGroup @name="Contents category">
+        <Select @options={{this.deliveryOptions.catalogue.categories}} @optionValue="code" @optionLabel="label" @value={{@meta.parcel.category}} @placeholder="Select contents category" @onSelect={{this.setCategory}} />
+    </InputGroup>
+    <InputGroup @name="Packaging type">
+        <Select @options={{this.packagingTypes}} @optionValue="value" @optionLabel="label" @value={{@meta.parcel.packaging_type}} @placeholder="Select packaging" @onSelect={{this.setPackaging}} />
+    </InputGroup>
+    {{#if this.category}}
+        <ul class="list-disc pl-5 text-sm">
+            {{#each this.category.instructions as |instruction|}}<li>{{instruction}}</li>{{/each}}
+        </ul>
+        <p class="text-sm">{{this.category.warning}}</p>
+    {{/if}}
+    {{#if this.deliveryOptions.error}}<p role="alert">{{this.deliveryOptions.error}}</p>{{/if}}
+</div>

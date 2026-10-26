@@ -86,7 +86,7 @@ module.exports = {
     },
 
     treeForIntlTelInput: function () {
-        const intlTelInputPath = path.dirname(require.resolve('intl-tel-input')).replace(/build\/js$/, '');
+        const intlTelInputPath = this.pathBase('intl-tel-input');
         const trees = [
             new Funnel(`${intlTelInputPath}/build/js`, {
                 include: ['utils.js'],
