@@ -10,5 +10,5 @@ export default function formatCurrency(amount = 0, currencyCode = 'USD') {
         decimalSeparator: '.',
     };
 
-    return formatMoney(!currency.decimalSeparator ? amount : amount / 100, currency.symbol, currency.precision, currency.thousandSeparator, currency.decimalSeparator);
+    return formatMoney(amount / 10 ** currency.precision, currency.symbol, currency.precision, currency.thousandSeparator, currency.decimalSeparator);
 }

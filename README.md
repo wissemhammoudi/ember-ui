@@ -14,6 +14,18 @@ Once you have installed the Fleetbase Components library, you can start using th
 
 For more information on how to use each component, please refer to the documentation.
 
+### Monetary units
+
+`format-currency` and `MoneyInput` accept integer minor units and use the currency
+precision for conversion. TND uses millimes (125000 = 125.000 TND), USD/EUR use
+cents, and JPY uses whole yen. `MoneyInput` emits integer minor units through
+`onChange`; formatted input text must not mutate the bound monetary model.
+Legacy callers without `onChange` retain Ember's formatted-text two-way binding;
+new monetary forms should supply `onChange` to receive canonical integers.
+Currency selection preserves the displayed major-unit amount and converts
+subsequent edits using the newly selected precision. Rebuild consumers after
+updating this library. This does not migrate or rescale historical records.
+
 ## Components
 
 The following components are included in the Fleetbase Ember UI Components library:
