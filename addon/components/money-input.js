@@ -20,16 +20,32 @@ export default class MoneyInputComponent extends Component {
 
         let whois = this.currentUser.getOption('whois');
 
-        this.currency = this.args.currency ?? whois?.currency?.code ?? 'USD';
-        this.currencyData = getCurrency(this.currency);
+        this.currencyData = this.resolveCurrency(this.args.currency, whois?.currency?.code);
+        this.currency = this.currencyData.code;
+    }
+
+    // getCurrency('') returns the whole list, so blank or unknown codes must fall back to a real currency.
+    resolveCurrency(...codes) {
+        for (const code of [...codes, 'USD']) {
+            if (typeof code === 'string' && code.trim()) {
+                const currency = getCurrency(code.trim());
+                if (currency && !Array.isArray(currency)) {
+                    return currency;
+                }
+            }
+        }
+        return getCurrency('USD');
     }
 
     @action autoNumerize(element) {
         const { onCurrencyChange } = this.args;
         let currency = this.currencyData;
-        let value = numbersOnly(this.args.value ?? 0);
+        let value = Number(numbersOnly(this.args.value ?? 0));
 
-        let amount = value / 10 ** currency.precision;
+        let amount = value / 10 ** (currency.precision ?? 2);
+        if (!Number.isFinite(amount)) {
+            amount = 0;
+        }
 
         this.autonumeric = new AutoNumeric(element, amount, this.getCurrencyFormatOptions(currency));
 
@@ -90,11 +106,14 @@ export default class MoneyInputComponent extends Component {
     }
 
     @action handleCurrencyChanges(el, [currency]) {
-        this.setCurrency(getCurrency(currency));
+        this.setCurrency(this.resolveCurrency(currency, this.currency));
     }
 
     @action updateValue() {
         const value = Number(numbersOnly(this.args.value ?? 0));
+        if (!Number.isFinite(value)) {
+            return;
+        }
         if (this.autonumeric && Math.round(this.autonumeric.getNumber() * 10 ** this.currencyData.precision) !== value) {
             this.autonumeric.set(value / 10 ** this.currencyData.precision);
         }
