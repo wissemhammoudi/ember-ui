@@ -2,7 +2,6 @@ import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
 import { action } from '@ember/object';
 import { debug } from '@ember/debug';
-import Chart, { _adapters } from 'chart.js/auto';
 import {
     parse,
     parseISO,
@@ -59,6 +58,8 @@ export default class ChartComponent extends Component {
             },
         };
 
+        const chartModulePromise = import('chart.js/auto');
+
         if (typeof options.data.datasets === 'function') {
             try {
                 this.isLoading = true;
@@ -70,11 +71,16 @@ export default class ChartComponent extends Component {
             }
         }
 
-        this.useDateFns();
+        const { default: Chart, _adapters } = await chartModulePromise;
+        if (this.isDestroyed || this.isDestroying) {
+            return;
+        }
+
+        this.useDateFns(_adapters);
         this.chart = new Chart(ctx, options);
     }
 
-    useDateFns() {
+    useDateFns(_adapters) {
         const FORMATS = {
             datetime: 'MMM d, yyyy, h:mm:ss aaaa',
             millisecond: 'h:mm:ss.SSS aaaa',

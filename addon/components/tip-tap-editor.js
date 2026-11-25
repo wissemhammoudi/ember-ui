@@ -2,22 +2,6 @@ import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
 import { action } from '@ember/object';
 import { inject as service } from '@ember/service';
-import { Editor } from '@tiptap/core';
-import StarterKit from '@tiptap/starter-kit';
-import Image from '@tiptap/extension-image';
-import Youtube from '@tiptap/extension-youtube';
-import Underline from '@tiptap/extension-underline';
-import Superscript from '@tiptap/extension-superscript';
-import Subscript from '@tiptap/extension-subscript';
-import FontFamily from '@tiptap/extension-font-family';
-import TextStyle from '@tiptap/extension-text-style';
-import Placeholder from '@tiptap/extension-placeholder';
-import TextAlign from '@tiptap/extension-text-align';
-import Table from '@tiptap/extension-table';
-import TableCell from '@tiptap/extension-table-cell';
-import TableHeader from '@tiptap/extension-table-header';
-import TableRow from '@tiptap/extension-table-row';
-import { Color } from '@tiptap/extension-color';
 
 const DEFAULT_TEXT_COLOR = '#000000';
 const FALLBACK_YOUTUBE_VID_URL = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
@@ -77,7 +61,47 @@ export default class TipTapEditorComponent extends Component {
         this.editable = editable;
     }
 
-    @action createTipTapEditor(el) {
+    @action async createTipTapEditor(el) {
+        const [
+            { Editor },
+            { default: StarterKit },
+            { default: Image },
+            { default: Youtube },
+            { default: Underline },
+            { default: Superscript },
+            { default: Subscript },
+            { default: FontFamily },
+            { default: TextStyle },
+            { default: Placeholder },
+            { default: TextAlign },
+            { default: Table },
+            { default: TableCell },
+            { default: TableHeader },
+            { default: TableRow },
+            { Color },
+        ] = await Promise.all([
+            import('@tiptap/core'),
+            import('@tiptap/starter-kit'),
+            import('@tiptap/extension-image'),
+            import('@tiptap/extension-youtube'),
+            import('@tiptap/extension-underline'),
+            import('@tiptap/extension-superscript'),
+            import('@tiptap/extension-subscript'),
+            import('@tiptap/extension-font-family'),
+            import('@tiptap/extension-text-style'),
+            import('@tiptap/extension-placeholder'),
+            import('@tiptap/extension-text-align'),
+            import('@tiptap/extension-table'),
+            import('@tiptap/extension-table-cell'),
+            import('@tiptap/extension-table-header'),
+            import('@tiptap/extension-table-row'),
+            import('@tiptap/extension-color'),
+        ]);
+
+        if (this.isDestroyed || this.isDestroying) {
+            return;
+        }
+
         this.editor = new Editor({
             element: el,
             extensions: [

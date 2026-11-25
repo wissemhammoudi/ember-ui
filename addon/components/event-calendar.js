@@ -2,8 +2,6 @@ import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
 import { action } from '@ember/object';
 import { scheduleOnce } from '@ember/runloop';
-import { createCalendar, destroyCalendar, ResourceTimeline, ResourceTimeGrid, TimeGrid, DayGrid, List, Interaction } from '@event-calendar/core';
-import '@event-calendar/core/index.css';
 
 /**
  * EventCalendar component wrapping @event-calendar/core (MIT licensed).
@@ -62,10 +60,10 @@ import '@event-calendar/core/index.css';
  */
 export default class EventCalendarComponent extends Component {
     /**
-     * All plugins enabled by default. Consumers can override via @plugins.
-     * @type {Array}
+     * Destroy helper captured once @event-calendar/core loads dynamically.
+     * @type {Function|null}
      */
-    defaultPlugins = [ResourceTimeline, ResourceTimeGrid, TimeGrid, DayGrid, List, Interaction];
+    _destroyCalendar = null;
 
     /**
      * Reference to the DOM element the calendar is mounted on.
@@ -121,11 +119,18 @@ export default class EventCalendarComponent extends Component {
      *
      * @param {HTMLElement} el
      */
-    @action setup(el) {
+    @action async setup(el) {
         this.calendarEl = el;
-        const plugins = this.args.plugins ?? this.defaultPlugins;
+        const [ec] = await Promise.all([import('@event-calendar/core'), import('@event-calendar/core/index.css')]);
+        if (this.isDestroyed || this.isDestroying) {
+            return;
+        }
+
+        this._destroyCalendar = ec.destroyCalendar;
+        const defaultPlugins = [ec.ResourceTimeline, ec.ResourceTimeGrid, ec.TimeGrid, ec.DayGrid, ec.List, ec.Interaction];
+        const plugins = this.args.plugins ?? defaultPlugins;
         const options = this._buildOptions();
-        this.calendar = createCalendar(el, plugins, options);
+        this.calendar = ec.createCalendar(el, plugins, options);
 
         if (typeof this.args.onCalendarReady === 'function') {
             this.args.onCalendarReady(this.calendar);
@@ -148,8 +153,8 @@ export default class EventCalendarComponent extends Component {
      * Called via {{will-destroy this.teardown}} in the template.
      */
     @action teardown() {
-        if (this.calendar) {
-            destroyCalendar(this.calendar);
+        if (this.calendar && typeof this._destroyCalendar === 'function') {
+            this._destroyCalendar(this.calendar);
         }
         this.calendar = null;
         this.calendarEl = null;

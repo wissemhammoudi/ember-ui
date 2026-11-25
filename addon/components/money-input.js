@@ -5,7 +5,6 @@ import { action } from '@ember/object';
 import { isNone } from '@ember/utils';
 import numbersOnly from '../utils/numbers-only';
 import getCurrency from '../utils/get-currency';
-import AutoNumeric from 'autonumeric';
 
 export default class MoneyInputComponent extends Component {
     @service fetch;
@@ -37,7 +36,12 @@ export default class MoneyInputComponent extends Component {
         return getCurrency('USD');
     }
 
-    @action autoNumerize(element) {
+    @action async autoNumerize(element) {
+        const { default: AutoNumeric } = await import('autonumeric');
+        if (this.isDestroyed || this.isDestroying) {
+            return;
+        }
+
         const { onCurrencyChange } = this.args;
         let currency = this.currencyData;
         let value = Number(numbersOnly(this.args.value ?? 0));

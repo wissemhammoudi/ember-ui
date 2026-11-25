@@ -2,9 +2,6 @@ import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
 import { action } from '@ember/object';
 import { classify } from '@ember/string';
-import { Calendar } from '@fullcalendar/core';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import interactionPlugin from '@fullcalendar/interaction';
 
 export default class FullCalendarComponent extends Component {
     /**
@@ -35,7 +32,17 @@ export default class FullCalendarComponent extends Component {
      *
      * @param {HTMLElement} calendarEl
      */
-    @action setupCalendar(calendarEl) {
+    @action async setupCalendar(calendarEl) {
+        const [{ Calendar }, { default: dayGridPlugin }, { default: interactionPlugin }] = await Promise.all([
+            import('@fullcalendar/core'),
+            import('@fullcalendar/daygrid'),
+            import('@fullcalendar/interaction'),
+        ]);
+
+        if (this.isDestroyed || this.isDestroying) {
+            return;
+        }
+
         // track calendar htmlelement
         this.calendarEl = calendarEl;
 

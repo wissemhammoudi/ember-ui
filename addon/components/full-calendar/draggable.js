@@ -1,7 +1,6 @@
 import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
 import { action } from '@ember/object';
-import { Draggable } from '@fullcalendar/interaction';
 
 export default class DraggableFullcalendarEventComponent extends Component {
     @tracked draggable;
@@ -14,10 +13,15 @@ export default class DraggableFullcalendarEventComponent extends Component {
         this.disabled = disabled;
     }
 
-    @action makeDraggable(element) {
+    @action async makeDraggable(element) {
         this.destroyDraggable();
         this.ready(element);
         if (this.disabled) {
+            return;
+        }
+
+        const { Draggable } = await import('@fullcalendar/interaction');
+        if (this.isDestroyed || this.isDestroying || this.disabled) {
             return;
         }
 
